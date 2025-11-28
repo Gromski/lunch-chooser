@@ -1,0 +1,207 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Entity
+model User {
+  id                      String   @id @default(uuid())
+  email                   String   @unique
+  emailVerified           DateTime?
+  name                    String?
+  passwordHash            String?
+  image                   String?
+  defaultLocationLat      Decimal? @db.Decimal(10, 8)
+  defaultLocationLng      Decimal? @db.Decimal(11, 8)
+  defaultLocationAddress  String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  // Relationships
+  createdLunchGroups      LunchGroup[] @relation("LunchGroupCreator")
+  lunchGroupParticipants  LunchGroupParticipant[]
+  votes                   Vote[]
+  dietaryRequirements     UserDietaryRequirement[]
+
+  @@index([email])
+  @@index([createdAt])
+  @@map("User")
+}
+
+// DietaryRequirement Entity
+model DietaryRequirement {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+
+  // Relationships
+  users       UserDietaryRequirement[]
+
+  @@map("DietaryRequirement")
+}
+
+// UserDietaryRequirement Junction Table
+model UserDietaryRequirement {
+  userId                String   @map("userId")
+  dietaryRequirementId  String   @map("dietaryRequirementId")
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dietaryRequirement    DietaryRequirement @relation(fields: [dietaryRequirementId], references: [id], onDelete: Cascade)
+
+  @@id([userId, dietaryRequirementId])
+  @@index([userId])
+  @@map("UserDietaryRequirement")
+}
+
+// Restaurant Entity
+model Restaurant {
+  id                  String    @id @default(uuid())
+  name                String
+  address             String?
+  latitude            Decimal   @db.Decimal(10, 8)
+  longitude           Decimal   @db.Decimal(11, 8)
+  googlePlaceId       String    @unique
+  foodTypes           String[]
+  establishmentType   String?
+  priceLevel          Int?
+  rating              Decimal?  @db.Decimal(3, 2)
+  userRatingsTotal    Int?
+  openingHours        Json?
+  phoneNumber         String?
+  website             String?
+  photoUrl            String?
+  lastCachedAt        DateTime  @default(now())
+  visitCount          Int       @default(0)
+  lastVisitedAt       DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relationships
+  votes               Vote[]
+  visitHistory        VisitHistory[]
+  categoryLinks       RestaurantCategoryLink[]
+  selectedByGroups    LunchGroup[]
+
+  @@index([googlePlaceId])
+  @@index([establishmentType])
+  @@index([lastVisitedAt])
+  @@index([visitCount])
+  @@map("Restaurant")
+}
+
+// RestaurantCategory Entity
+model RestaurantCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+
+  // Relationships
+  restaurants RestaurantCategoryLink[]
+
+  @@map("RestaurantCategory")
+}
+
+// RestaurantCategoryLink Junction Table
+model RestaurantCategoryLink {
+  restaurantId       String   @map("restaurantId")
+  categoryId         String   @map("categoryId")
+  restaurant         Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  category           RestaurantCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([restaurantId, categoryId])
+  @@index([restaurantId])
+  @@index([categoryId])
+  @@map("RestaurantCategoryLink")
+}
+
+// LunchGroup Entity
+model LunchGroup {
+  id                          String    @id @default(uuid())
+  date                        DateTime  @db.Date
+  status                      String    @default("planning")
+  locationLat                 Decimal   @db.Decimal(10, 8)
+  locationLng                 Decimal   @db.Decimal(11, 8)
+  locationAddress             String?
+  aggregatedDietaryRequirements String[]
+  selectedRestaurantId        String?
+  selectedRestaurant          Restaurant? @relation(fields: [selectedRestaurantId], references: [id])
+  createdById                 String    @map("createdById")
+  createdBy                   User      @relation("LunchGroupCreator", fields: [createdById], references: [id])
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+
+  // Relationships
+  participants                LunchGroupParticipant[]
+  votes                       Vote[]
+  visitHistory                VisitHistory[]
+
+  @@index([date])
+  @@index([status])
+  @@index([createdById])
+  @@index([selectedRestaurantId])
+  @@map("LunchGroup")
+}
+
+// LunchGroupParticipant Junction Table
+model LunchGroupParticipant {
+  lunchGroupId  String   @map("lunchGroupId")
+  userId        String   @map("userId")
+  joinedAt      DateTime @default(now())
+  lunchGroup    LunchGroup @relation(fields: [lunchGroupId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([lunchGroupId, userId])
+  @@index([lunchGroupId])
+  @@index([userId])
+  @@map("LunchGroupParticipant")
+}
+
+// Vote Entity
+model Vote {
+  id            String    @id @default(uuid())
+  lunchGroupId  String    @map("lunchGroupId")
+  userId        String    @map("userId")
+  restaurantId  String    @map("restaurantId")
+  createdAt     DateTime  @default(now())
+
+  // Relationships
+  lunchGroup    LunchGroup @relation(fields: [lunchGroupId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([lunchGroupId, userId, restaurantId])
+  @@index([lunchGroupId])
+  @@index([restaurantId])
+  @@index([userId])
+  @@map("Vote")
+}
+
+// VisitHistory Entity
+model VisitHistory {
+  id            String    @id @default(uuid())
+  lunchGroupId  String    @map("lunchGroupId")
+  restaurantId  String    @map("restaurantId")
+  visitedAt     DateTime  @db.Date
+  notes         String?
+  createdAt     DateTime  @default(now())
+
+  // Relationships
+  lunchGroup    LunchGroup @relation(fields: [lunchGroupId], references: [id], onDelete: Cascade)
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([lunchGroupId])
+  @@index([restaurantId])
+  @@index([visitedAt])
+  @@index([restaurantId, visitedAt])
+  @@map("VisitHistory")
+}
+
