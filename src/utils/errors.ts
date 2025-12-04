@@ -89,3 +89,5 @@ export function logError(error: unknown, context?: Record<string, unknown>) {
   // In production, you would send to error tracking service (e.g., Sentry)
 }
 
+
+
