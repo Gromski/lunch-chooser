@@ -70,7 +70,7 @@ export const lunchGroupCreateSchema = z.object({
 
 export const lunchGroupUpdateSchema = z.object({
   status: z.enum(['planning', 'voting', 'decided', 'completed']).optional(),
-  selectedRestaurantId: z.string().uuid().optional(),
+  selectedRestaurantId: z.string().uuid().nullable().optional(),
 })
 
 /**
