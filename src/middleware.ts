@@ -1,26 +1,23 @@
-import { withAuth } from 'next-auth/middleware'
-import { NextResponse } from 'next/server'
+/**
+ * Next.js middleware
+ * For NextAuth v5, we'll check authentication in individual route handlers
+ * This middleware is kept simple for now
+ */
 
-export default withAuth(
-  function middleware(req) {
-    return NextResponse.next()
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        // Allow all routes by default
-        // Protected routes will check auth in their handlers
-        return true
-      },
-    },
-  }
-)
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export function middleware(request: NextRequest) {
+  // For now, we'll handle auth checks in individual route handlers
+  // This allows for more granular control
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
+     * - api (API routes - we check auth in handlers)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
@@ -28,4 +25,3 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }
-

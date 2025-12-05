@@ -1,12 +1,11 @@
 import { NextRequest } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { successResponse, errorResponse, createdResponse } from '@/utils/api-response'
 import { validateRequest } from '@/lib/validation'
 import { userRegistrationSchema, userUpdateSchema } from '@/lib/validation'
 import { hash } from 'bcryptjs'
-import { UnauthorizedError, ValidationError, NotFoundError } from '@/utils/errors'
+import { ValidationError, NotFoundError } from '@/utils/errors'
+import { requireAuth } from '@/lib/auth-helpers'
 
 /**
  * GET /api/v1/users
@@ -14,11 +13,7 @@ import { UnauthorizedError, ValidationError, NotFoundError } from '@/utils/error
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
-      return errorResponse(new UnauthorizedError('Authentication required'))
-    }
+    const session = await requireAuth()
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -98,11 +93,7 @@ export async function POST(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
-      return errorResponse(new UnauthorizedError('Authentication required'))
-    }
+    const session = await requireAuth()
 
     const body = await validateRequest(request, userUpdateSchema)
 

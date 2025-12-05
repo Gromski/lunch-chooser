@@ -1,11 +1,14 @@
-import { NextAuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
+/**
+ * NextAuth v5 (Auth.js) configuration
+ * Since we're using JWT sessions, we don't need a database adapter
+ */
+
+import type { NextAuthConfig } from 'next-auth'
+import Credentials from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/prisma'
 import { compare } from 'bcryptjs'
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+export const authConfig: NextAuthConfig = {
   session: {
     strategy: 'jwt',
   },
@@ -15,8 +18,7 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error',
   },
   providers: [
-    CredentialsProvider({
-      name: 'credentials',
+    Credentials({
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
@@ -28,7 +30,7 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email,
+            email: credentials.email as string,
           },
         })
 
@@ -37,7 +39,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const isPasswordValid = await compare(
-          credentials.password,
+          credentials.password as string,
           user.passwordHash
         )
 
@@ -69,4 +71,3 @@ export const authOptions: NextAuthOptions = {
     },
   },
 }
-
