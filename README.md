@@ -168,12 +168,26 @@ To use this project:
 
 ## 🔗 Documentation Links
 
+### Quick Start
+- [Setup Guide](docs/SETUP.md) - Get started quickly with setup instructions
+
+### Core Documentation
 - [Product Requirements Document](docs/lunch-tool-prd.md)
 - [Implementation Plan](docs/implementation.md)
 - [Data Model](docs/data_model.md)
 - [API Specifications](docs/api_specifications.md)
 - [Project Structure](docs/project_structure.md)
 - [UI/UX Documentation](docs/uiux_doc.md)
+
+### Setup & Configuration
+- [Supabase Setup](docs/supabase-setup.md) - Database setup guide
+- [Database Setup](docs/database-setup.md) - Alternative local PostgreSQL setup
+- [Google Places API Setup](docs/google-places-api-setup.md) - API configuration
+- [NextAuth v5 Setup](docs/NEXTAUTH_V5_SETUP.md) - Authentication configuration
+
+### Progress & Status
+- [Stage 2 Progress](docs/STAGE2_PROGRESS.md) - Development progress tracking
+- [Stage 2 Complete](docs/STAGE2_COMPLETE.md) - Completed features summary
 
 ## 📄 License
 
