@@ -4,7 +4,7 @@ import { successResponse, errorResponse } from '@/utils/api-response'
 import { validateRequest } from '@/lib/validation'
 import { lunchGroupUpdateSchema } from '@/lib/validation'
 import { requireAuth } from '@/lib/auth-helpers'
-import { NotFoundError, ForbiddenError } from '@/utils/errors'
+import { NotFoundError, ForbiddenError, ValidationError } from '@/utils/errors'
 import { logger } from '@/utils/logger'
 
 /**

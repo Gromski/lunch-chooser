@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { successResponse, errorResponse } from '@/utils/api-response'
 import { requireAuth } from '@/lib/auth-helpers'
-import { NotFoundError, ForbiddenError } from '@/utils/errors'
+import { NotFoundError, ForbiddenError, ValidationError } from '@/utils/errors'
 import { logger } from '@/utils/logger'
 
 /**

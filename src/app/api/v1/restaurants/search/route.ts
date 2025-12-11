@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     logger.info(`Found ${googlePlaces.length} places from Google Places API`)
 
     // Process and cache restaurants
-    const restaurants = await Promise.all(
+    const restaurants = (await Promise.all(
       googlePlaces.map(async (place) => {
         const restaurantData = googlePlaceToRestaurant(place)
 
@@ -78,8 +78,9 @@ export async function GET(request: NextRequest) {
           }
         }
 
+        // Skip if restaurant creation/update failed
         if (!restaurant) {
-          continue // Skip if restaurant creation failed
+          return null
         }
 
         // Calculate distance and walk time
@@ -113,7 +114,7 @@ export async function GET(request: NextRequest) {
           lastVisitedAt: restaurant.lastVisitedAt,
         }
       })
-    )
+    )).filter((r): r is NonNullable<typeof r> => r !== null)
 
     // Apply filters
     let filteredRestaurants = restaurants
